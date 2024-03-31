@@ -1,0 +1,239 @@
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VariableDemo {
+    uint public myUint = 8;
+    string public myString = "Hello";
+    bool public myBool = true;
+    address public myAddress = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
+
+}
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract DemoLoop {
+    function loopExample() public pure returns (uint) {
+        uint result = 0;
+        // For loop
+        for (uint i = 0; i < 5; i++) {
+            result += i;
+        }
+        return result;
+    }
+}
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract DemoDecesion{
+    function DescionMakeing(uint a , uint b) public  pure returns(string memory){
+   if (a > b){
+    return  "a is bigger";
+    }
+    else{
+        return  "b string is bigger";
+    }
+    }}
+
+
+ // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract OperatorsDemo {
+
+    function Addition(uint a , uint b) public pure returns (uint) {
+        uint result;
+        result = a + b; 
+        return result;	
+    }
+
+    function substraction(uint a , uint b) public  pure returns(uint){
+      uint result;
+      result = a-b;
+      return result;
+    }
+
+    function multiplication(uint a, uint b) public  pure returns (uint){
+    uint result;
+    result = a*b;
+    return  result;
+    }
+ 
+}
+
+
+
+
+/////////// for ARRAY
+ 
+ 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ArraysDemo {
+    uint[] public myArray= [1, 2, 3]; // Declare a public array of integers
+    // Function to retrieve the array values
+    function getMyArray() public view returns (uint[] memory) {
+        return myArray;
+    }
+}
+
+
+///////// Enum
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract EnumDemo {
+    enum Color {Red, Green, Blue}
+    Color public myColor = Color.Red;
+}
+
+
+
+////////// strcut 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract StructDemo {
+    struct Person {
+        string name;
+        uint age;
+    }
+    Person public myPerson = Person("Alice", 30);
+}
+
+
+
+//////////// mapping
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MappingDemo {
+    mapping(uint => string) public idToName;
+}
+
+
+/// conversion
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ConversionDemo {
+    uint public myUint = 10;
+    int public myInt = int(myUint);
+}
+
+
+// ether UNit
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract EtherUnitsDemo {
+    // Function to convert wei to ether and return the result
+    function etherUnits() public payable returns (uint) {
+        // Get the amount in wei sent with the transaction
+        uint weiAmount = msg.value;
+        
+        // Convert wei to ether
+        uint etherAmount = weiAmount / 1 ether;
+
+        // Return the ether amount
+        return etherAmount;
+    }
+}
+
+
+/////////////// Special varibale 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SpecialVariablesDemo {
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function getCurrentTimestamp() public view returns (uint) {
+        return block.timestamp;
+    }
+}
+
+
+///////////////////////////////////////////////////////////////// Pract 7
+
+///// Pure fun 
+ // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract OperatorsDemo {
+
+    function Addition(uint a , uint b) public pure returns (uint) {
+        uint result;
+        result = a + b; 
+        return result;	
+    }
+ 
+}
+
+
+///////// view fun
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract HelloWorld {
+string private greeting = "Hello, World!";
+// View function to get the greeting message
+function getGreeting() public view returns (string memory) {
+return greeting;
+}
+}
+
+//////////// fall back 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract FallbackDemo {
+event Received(address sender, uint amount);
+event FallbackCalled(address sender, uint amount);
+// Fallback function
+fallback() external payable {
+emit FallbackCalled(msg.sender, msg.value);
+}
+// Receive Ether function
+receive() external payable {
+emit Received(msg.sender, msg.value);
+}
+}
+
+////////////// function overloading 
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract MathOperations {
+// Function to add two numbers
+function add(uint256 a, uint256 b) public pure returns (uint256) {
+return a + b;
+}
+// Overloaded function to add three numbers
+function add(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+return a + b + c;
+}
+}
+
+///////////////////////////////////////////////////////////////////// Voteing  pract 8
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+contract Poll {
+event Voted(address _voter, uint _value);
+mapping(address => uint) public votes;
+string public pollSubject = "Press 1 for BJP or Press 2 for SHIVSENA";
+function getPoll() public view returns(string memory) {
+return pollSubject;
+}
+function vote(uint selection) public {
+require(votes[msg.sender] == 0, "You have already voted.");
+require(selection > 0 && selection < 3, "Invalid selection. Press 1 for BJP or Press 2 for SHIVSENA");
+votes[msg.sender] = selection;
+emit Voted(msg.sender, selection);
+}
+}
