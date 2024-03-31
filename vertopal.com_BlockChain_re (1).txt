@@ -1,8 +1,8 @@
 
 
-Practical 1
+########################### Practical 1 AIM: Write a python code to create Merkle tree.
 
-AIM: Write a python code to create Merkle tree.
+ 
 
     import hashlib
 
@@ -54,9 +54,7 @@ AIM: Write a python code to create Merkle tree.
     result = merkle_tree.verify_proof(merkle_tree.get_root(), index_to_verify, data[index_to_verify], proof)
     print(f"Verification result for Transaction {index_to_verify + 1}: {result}")
 
-Practical 2
-
-AIM: Creation of Block.
+##############################  Practical 2 AIM: Creation of Block.
 
     def create_block(data, previous_hash=None):
         block = {
@@ -75,9 +73,9 @@ AIM: Creation of Block.
 
     !pip install pycryptodome
 
-Practical 3
+############# Practical 3 AIM -Create a simple client class that generates public key and private key by using built-in python technique RSA (Rivest–Shamir–Adleman) algorithm and test
 
-AIM -Create a simple client class that generates public key and private key by using built-in python technique RSA (Rivest–Shamir–Adleman) algorithm and test
+
 
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives import hashes
