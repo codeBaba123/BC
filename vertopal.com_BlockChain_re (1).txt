@@ -1,0 +1,449 @@
+
+
+Practical 1
+
+AIM: Write a python code to create Merkle tree.
+
+    import hashlib
+
+    class MerkleTree:
+        def __init__(self, data):
+            self.data = data
+            self.tree = self._build_tree()
+
+        def _build_tree(self):
+            if len(self.data) % 2 != 0:
+                self.data.append(self.data[-1])  # Duplicate the last element for an even number of elements
+            tree = [hashlib.sha256(str(value).encode()).hexdigest() for value in self.data]
+            while len(tree) > 1:
+                tree = [hashlib.sha256((tree[i] + tree[i + 1]).encode()).hexdigest() for i in range(0, len(tree), 2)]
+            return tree
+
+        def get_root(self):
+            return self.tree[0]
+
+        def get_proof(self, index):
+            if index < 0 or index >= len(self.data):
+                raise ValueError("Index out of range")
+            proof = []
+            currentIndex = index
+            for level in range(len(self.tree) // 2):
+                isRightChild = currentIndex % 2
+                siblingIndex = currentIndex + 1 if isRightChild else currentIndex - 1
+                proof.append((isRightChild, self.tree[siblingIndex]))
+                currentIndex = currentIndex // 2
+            return proof
+
+        def verify_proof(self, root, index, value, proof):
+            currentHash = hashlib.sha256(str(value).encode()).hexdigest()
+            for isRightChild, siblingHash in proof:
+                if isRightChild:
+                    currentHash = hashlib.sha256((siblingHash + currentHash).encode()).hexdigest()
+                else:
+                    currentHash = hashlib.sha256((currentHash + siblingHash).encode()).hexdigest()
+            return currentHash == root
+
+    # Example usage:
+    data = ["Transaction 1", "Transaction 2", "Transaction 3", "Transaction 4"]
+    merkle_tree = MerkleTree(data)
+    print("Merkle Tree Root:", merkle_tree.get_root())
+
+    # Verify proof for the first transaction
+    index_to_verify = 0
+    proof = merkle_tree.get_proof(index_to_verify)
+    result = merkle_tree.verify_proof(merkle_tree.get_root(), index_to_verify, data[index_to_verify], proof)
+    print(f"Verification result for Transaction {index_to_verify + 1}: {result}")
+
+Practical 2
+
+AIM: Creation of Block.
+
+    def create_block(data, previous_hash=None):
+        block = {
+            'data': data,
+            'previous_hash': previous_hash,
+            'hash': hash(data + str(previous_hash))
+        }
+        return block
+
+    block_data = "Some data for the block"
+    previous_hash = "Previous Block's hash"
+    my_block = create_block(data=block_data, previous_hash=previous_hash)
+    print(f"Block data: {my_block['data']}")
+    print(f"Previous hash: {my_block['previous_hash']}")
+    print(f"Block hash: {my_block['hash']}")
+
+    !pip install pycryptodome
+
+Practical 3
+
+AIM -Create a simple client class that generates public key and private key by using built-in python technique RSA (Rivest–Shamir–Adleman) algorithm and test
+
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import rsa, padding
+
+    class Client:
+        def __init__(self):
+            # Generate private and public keys
+            private_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+                backend=default_backend()
+            )
+            self.private_key = private_key
+            self.public_key = private_key.public_key()
+
+        def encrypt_message(self, message):
+            # Encrypt the message using the public key
+            ciphertext = self.public_key.encrypt(
+                message.encode(),
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+            return ciphertext
+
+        def decrypt_message(self, ciphertext):
+            # Decrypt the message using the private key
+            decrypted_message = self.private_key.decrypt(
+                ciphertext,
+                padding.OAEP(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    algorithm=hashes.SHA256(),
+                    label=None
+                )
+            )
+            return decrypted_message.decode()
+
+    # Test the Client class
+    if __name__ == "__main__":
+        # Create a client
+        client = Client()
+
+        # Display public and private keys
+        print("Public Key:", client.public_key)
+        print("Private Key:", client.private_key)
+
+        # Message to be encrypted
+        original_message = "Hello, RSA!"
+
+        # Encrypt and display the encrypted message
+        encrypted_message = client.encrypt_message(original_message)
+        print("Encrypted Message:", encrypted_message)
+
+        # Decrypt and display the decrypted message
+        decrypted_message = client.decrypt_message(encrypted_message)
+        print("Decrypted Message:", decrypted_message)
+
+Create a transaction class to send and receive money and test it.
+
+    class Transaction:
+        def __init__(self, sender, receiver, amount):
+            self.sender = sender
+            self.receiver = receiver
+            self.amount = amount
+            self.status = "Pending"
+
+        def send_money(self):
+            if self.status == "Pending":
+                # Simulate the process of sending money
+                print(f"{self.sender} is sending {self.amount} to {self.receiver}.")
+                self.status = "Completed"
+                print("Transaction completed successfully.")
+            else:
+                print("Transaction has already been completed or canceled.")
+
+        def receive_money(self):
+            if self.status == "Completed":
+                # Simulate the process of receiving money
+                print(f"{self.receiver} received {self.amount} from {self.sender}.")
+                print("Money received successfully.")
+            else:
+                print("Transaction is pending or has been canceled.")
+
+    # Test the Transaction class
+    if __name__ == "__main__":
+        # Create a transaction
+        sender_name = "Alice"
+        receiver_name = "Bob"
+        transaction_amount = 100.0
+        transaction = Transaction(sender_name, receiver_name, transaction_amount)
+
+        # Display transaction details
+        print("Transaction Details:")
+        print(f"Sender: {transaction.sender}")
+        print(f"Receiver: {transaction.receiver}")
+        print(f"Amount: {transaction.amount}")
+        print(f"Status: {transaction.status}")
+
+        # Send money
+        transaction.send_money()
+
+        # Display updated status
+        print(f"Updated Status: {transaction.status}")
+
+        # Receive money
+        transaction.receive_money()
+
+Create multiple transactions and display them.
+
+
+    class Transaction:
+        def __init__(self, sender, receiver, amount):
+            self.sender = sender
+            self.receiver = receiver
+            self.amount = amount
+            self.status = "Pending"
+
+        def send_money(self):
+            if self.status == "Pending":
+                print(f"{self.sender} is sending {self.amount} to {self.receiver}.")
+                self.status = "Completed"
+                print("Transaction completed successfully.")
+            else:
+                print("Transaction has already been completed or canceled.")
+
+        def receive_money(self):
+            if self.status == "Completed":
+                print(f"{self.receiver} received {self.amount} from {self.sender}.")
+                print("Money received successfully.")
+            else:
+                print("Transaction is pending or has been canceled.")
+
+    # Create multiple transactions
+    transactions = [
+        Transaction(sender="Alice", receiver="Bob", amount=50.0),
+        Transaction(sender="Bob", receiver="Charlie", amount=30.0),
+        Transaction(sender="Charlie", receiver="Alice", amount=20.0),
+    ]
+
+    # Display details and perform transactions
+    for idx, transaction in enumerate(transactions, start=1):
+        print(f"\nTransaction {idx} Details:")
+        print(f"Sender: {transaction.sender}")
+        print(f"Receiver: {transaction.receiver}")
+        print(f"Amount: {transaction.amount}")
+        print(f"Status: {transaction.status}")
+
+        # Perform transactions
+        transaction.send_money()
+        transaction.receive_money()
+
+Creating blockchain, a genesis block and execute it.
+
+    import hashlib
+    import time
+
+    class Block:
+        def __init__(self, index, data, previous_hash=None):
+            self.index = index
+            self.timestamp = time.time()  # Using the standard Unix timestamp format
+            self.data = data
+            self.previous_hash = previous_hash
+            self.hash = self.calculate_hash()
+
+        def calculate_hash(self):
+            data_string = str(self.index) + str(self.timestamp) + str(self.data) + str(self.previous_hash)
+            return hashlib.sha256(data_string.encode()).hexdigest()
+
+    class Blockchain:
+        def __init__(self):
+            self.chain = [self.create_genesis_block()]
+
+        def create_genesis_block(self):
+            return Block(index=0, data="Genesis Block")
+
+        def add_block(self, data):
+            previous_block = self.chain[-1]
+            new_block_index = previous_block.index + 1
+            new_block = Block(index=new_block_index, data=data, previous_hash=previous_block.hash)
+            self.chain.append(new_block)
+
+        def display_chain(self):
+            for block in self.chain:
+                print(f"Block #{block.index}")
+                print(f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(block.timestamp))}")
+                print(f"Data: {block.data}")
+                print(f"Previous Hash: {block.previous_hash}")
+                print(f"Hash: {block.hash}")
+                print("\n")
+
+    # Create a blockchain and add blocks
+    blockchain = Blockchain()
+    blockchain.add_block("Transaction 1")
+    blockchain.add_block("Transaction 2")
+    blockchain.add_block("Transaction 3")
+
+    # Display the blockchain
+    blockchain.display_chain()
+
+Create a mining function and test it.
+
+    import hashlib
+    import time
+
+    class Block:
+        def __init__(self, index, data, previous_hash=None):
+            self.index = index
+            self.timestamp = time.time()  # Using the standard Unix timestamp format
+            self.data = data
+            self.previous_hash = previous_hash
+            self.hash = self.calculate_hash()
+
+        def calculate_hash(self):
+            data_string = str(self.index) + str(self.timestamp) + str(self.data) + str(self.previous_hash)
+            return hashlib.sha256(data_string.encode()).hexdigest()
+
+    class Blockchain:
+        def __init__(self):
+            self.chain = [self.create_genesis_block()]
+
+        def create_genesis_block(self):
+            return Block(index=0, data="Genesis Block")
+
+        def add_block(self, data):
+            previous_block = self.chain[-1]
+            new_block_index = previous_block.index + 1
+            new_block = Block(index=new_block_index, data=data, previous_hash=previous_block.hash)
+            self.chain.append(new_block)
+
+        def display_chain(self):
+            for block in self.chain:
+                print(f"Block #{block.index}")
+                print(f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(block.timestamp))}")
+                print(f"Data: {block.data}")
+                print(f"Previous Hash: {block.previous_hash}")
+                print(f"Hash: {block.hash}")
+                print("\n")
+
+    # Create a blockchain and add blocks
+    blockchain = Blockchain()
+    blockchain.add_block("Transaction 1")
+    blockchain.add_block("Transaction 2")
+    blockchain.add_block("Transaction 3")
+
+    # Display the blockchain
+    blockchain.display_chain()
+
+Add blocks to the miner and dump the blockchain
+
+    import hashlib
+    import time
+
+    class Block:
+        def __init__(self, index, data, previous_hash=None, timestamp=None, nonce=0):
+            self.index = index
+            self.timestamp = timestamp or time.time()
+            self.data = data
+            self.previous_hash = previous_hash
+            self.nonce = nonce
+            self.hash = self.calculate_hash()
+
+        def calculate_hash(self):
+            data_string = str(self.index) + str(self.timestamp) + str(self.data) + str(self.previous_hash) + str(self.nonce)
+            return hashlib.sha256(data_string.encode()).hexdigest()
+
+    class Blockchain:
+        def __init__(self):
+            self.chain = [self.create_genesis_block()]
+
+        def create_genesis_block(self):
+            return Block(index=0, data="Genesis Block")
+
+        def add_block(self, data):
+            previous_block = self.chain[-1]
+            new_block_index = previous_block.index + 1
+            new_block = Block(index=new_block_index, data=data, previous_hash=previous_block.hash)
+            self.mine_block(new_block)
+            self.chain.append(new_block)
+
+        def mine_block(self, block):
+            difficulty = 2  # Set the difficulty level (number of leading zeros)
+            while not self.is_valid_proof(block, difficulty):
+                block.nonce += 1
+                block.hash = block.calculate_hash()
+            print(f"Block #{block.index} mined: Nonce = {block.nonce}, Hash = {block.hash}")
+
+        def is_valid_proof(self, block, difficulty):
+            return block.hash[:difficulty] == '0' * difficulty
+
+        def display_chain(self):
+            for block in self.chain:
+                print(f"Block #{block.index}")
+                print(f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(block.timestamp))}")
+                print(f"Data: {block.data}")
+                print(f"Previous Hash: {block.previous_hash}")
+                print(f"Nonce: {block.nonce}")
+                print(f"Hash: {block.hash}")
+                print("\n")
+
+    class Miner:
+        def __init__(self, blockchain):
+            self.blockchain = blockchain
+
+        def mine_blocks(self, data_list):
+            for data in data_list:
+                self.blockchain.add_block(data)
+
+    # Test the mining function and display the blockchain
+    blockchain = Blockchain()
+    miner = Miner(blockchain)
+
+    # Add blocks to the miner
+    miner_data = ["Transaction 1", "Transaction 2", "Transaction 3", "Transaction 4", "Transaction 5"]
+    miner.mine_blocks(miner_data)
+
+    # Display the entire blockchain
+    blockchain.display_chain()
+
+PRACTICAL NO. 5
+
+Write a python program to implement mining using blockchain.
+
+    import hashlib
+    from datetime import datetime
+
+    class Block:
+        def __init__(self, index, previous_hash, timestamp, data, hash):
+            self.index = index
+            self.previous_hash = previous_hash
+            self.timestamp = timestamp
+            self.data = data
+            self.hash = hash
+
+    def calculate_hash(index, previous_hash, timestamp, data):
+        value = str(index) + str(previous_hash) + str(timestamp) + str(data)
+        return hashlib.sha256(value.encode()).hexdigest()
+
+    def create_genesis_block():
+        # Genesis block is the first block in the blockchain
+        return Block(0, "0", datetime.now(), "Genesis Block", calculate_hash(0, "0", datetime.now(), "Genesis Block"))
+
+    def create_new_block(previous_block, data):
+        index = previous_block.index + 1
+        timestamp = datetime.now()
+        hash = calculate_hash(index, previous_block.hash, timestamp, data)
+        return Block(index, previous_block.hash, timestamp, data, hash)
+
+    def mine_block(previous_block, data, difficulty):
+        new_block = create_new_block(previous_block, data)
+        prefix = '0' * difficulty
+        while new_block.hash[:difficulty] != prefix:
+            new_block.timestamp = datetime.now()
+            new_block.hash = calculate_hash(new_block.index, new_block.previous_hash, new_block.timestamp, new_block.data)
+        print("Block mined:", new_block.hash)
+        return new_block
+
+    if __name__ == "__main__":
+        difficulty_level = 4  # Adjust the difficulty level as needed
+        blockchain = [create_genesis_block()]
+        previous_block = blockchain[0]
+
+        # Simulate mining multiple blocks
+        for i in range(1, 5):
+            new_data = f"Transaction data for Block {i}"
+            previous_block = mine_block(previous_block, new_data, difficulty_level)
+            blockchain.append(previous_block)
